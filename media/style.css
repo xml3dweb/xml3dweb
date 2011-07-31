@@ -1,0 +1,263 @@
+html,body {
+height: 100%
+}
+
+body {
+margin:0;
+padding:0;
+font-family: sans-serif;
+font-size: 12px;
+}
+
+.toolbar {
+height: 25px;
+width: 1019px;
+padding-top: 3px;
+background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(229,229,229,1) 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,1)), color-stop(100%,rgba(229,229,229,1))); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%); /* Chrome10+,Safari5.1+ */
+border-bottom: 2px solid #ccc;
+border-right: 1px solid #ccc;
+}
+
+.toolbar ul#tools {
+list-style:none;
+padding:0;
+margin:0;
+}
+
+#logo {
+margin: 0 5px;
+}
+
+.toolbar ul#tools li {
+float:left;
+line-height:2em;
+}
+
+.toolbar ul#tools li input[type="button"] {
+padding: 1px;
+background-repeat: no-repeat;
+background-position: center;
+border: 1px solid #ccc;
+-moz-border-radius: 2px;
+-webkit-border-radius: 2px;
+-khtml-border-radius: 2px;
+border-radius: 2px;
+cursor:pointer;
+min-width: 30px;
+background-color: #fff;
+}
+
+.toolbar ul#tools li input[type="button"]:hover{
+border-color: #000;
+background-color: #fefefe;
+}
+
+.toolbar ul#tools li div#status {
+width: 12px;
+height: 12px;
+float: right;
+padding-left: 12px;
+margin: 0 10px;
+-moz-border-radius: 6px;
+-webkit-border-radius: 6px;
+margin-top: 6px;
+background-color: #ff0000;
+cursor:pointer;
+}
+
+#collexp {
+position:absolute;
+right: 0;
+bottom: 0;
+cursor:pointer;
+z-index: 50;
+}
+
+#main {
+min-height: 100%;
+height: auto !important;
+height: 100%; 
+}
+
+#MyXml3d {
+width: 100%;
+z-index: 1;
+}
+
+#debug {
+margin:0;
+padding:0;
+position:absolute;
+display:none;
+bottom: 0;
+}
+
+#debugheader {
+border-top: 2px solid #ccc;
+border-bottom: 1px solid #ccc;
+height: 25px;
+line-height: 25px;
+margin: 0;
+}
+
+#debug #output {
+height: 160px;
+border: 0;
+margin: 0 auto;
+width: 99%;
+}
+
+#mbox{
+background-color:#eee; 
+padding:8px; 
+border:2px outset #666;
+}
+
+#mbm{
+font-family:sans-serif;
+font-weight:bold;
+float:right;
+padding-bottom:5px;
+}
+
+#ol{
+background-image: url(overlay.png);
+}
+
+.mitte {
+width:1020px;
+height:490px;
+margin:0px;
+padding:0px;
+}
+#mainXML3D {
+width:868px;
+height:490px;
+float:left;
+}
+#MyXml3d {
+width: 100%;
+height: 100%;
+}
+#rechts {
+float:right;
+height:500px;
+width:150px;
+border-right:1px solid #ccc;
+}
+#fuss {
+border-top: 2px solid #ccc;
+border-right: 1px solid #ccc;
+border-bottom: 1px solid #ccc;
+height:140px;
+width:1019px;
+}
+#navigation {
+height:140px;
+float:left;
+width:200px;
+overflow: auto;
+background-color:#ffffff;
+}
+#choose{
+float:left;
+width:816px;
+margin-top: -8px;
+border-left: 2px solid #ccc;
+}
+#browseHeader{
+height:15px;
+margin:0px;
+padding: 3px;
+font-weight:bold;
+background-color:#F5F5F5;
+background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(229,229,229,1) 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,1)), color-stop(100%,rgba(229,229,229,1))); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%,rgba(229,229,229,1) 100%); /* Chrome10+,Safari5.1+ */
+border-bottom: 1px solid #ccc;
+}
+
+#browseList{
+overflow: auto;
+height: 112px;
+padding-top:5px;
+background-color:#ffffff;
+}
+
+#rightHeader{
+height:15px;
+margin:0px;
+padding: 3px;
+padding-left: 5px;
+font-weight:bold;
+background-color:#efefef;
+border-left: 1px solid #ccc;
+border-bottom: 1px solid #ccc;
+}
+
+#rightContent{
+width:142px;
+float:left;
+border-left: 1px solid #ccc;
+border-bottom: 2px solid #ccc;
+height:464px;
+border-top:0px;
+margin:0px;
+padding:2px;
+padding-left:5px;
+background-color:#ffffff;
+}
+
+/*#noborder img {
+padding: 0 10px;
+border-right: 2px solid #000;
+}
+
+#noborder img:last-child {
+border-right: 0;
+}*/
+
+ul.closed, ul.opened {
+  font-size:12px;
+  list-style-type:none;
+  font-weight:bold;
+  line-height:16px;
+  padding-left:15px;
+}
+div.closed{
+	display:none;
+}
+div.opened>img{
+	padding: 0 10px;
+	border-right: 2px solid #000;
+}
+div.opened>img:last-child{
+	padding: 0 10px;
+}
+div.opened {
+  display:block;
+  
+}
+ul.closed {
+  display:none;
+}
+
+ul.opened {
+  display:block;
+}
+
+a.folder {
+  cursor:pointer;
+}
+
+a.nav {
+  font-weight:bold;
+  font-style:italic;
+}
+
+a.nav:link, a.nav:visited, a.nav:hover, a.nav:active {
+  color:rgb(8,108,8);
+  text-decoration:none;
+}

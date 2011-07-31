@@ -1,0 +1,327 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:webgl="http://www.xml3d.org/2009/xml3d/webgl" xmlns:physics="http://www.xml3d.org/2009/physics">
+    <head>
+        <link rel="stylesheet" type="text/css" media="screen" href="media/style.css" />
+		<script type="text/javascript" src="lib/commands.js"></script>
+        <script type="text/javascript" src="lib/menu.js"></script>
+		<script type="text/javascript" src="lib/shader.js"></script>
+		<script type="text/javascript" src="lib/move.js"></script>
+        <script type="text/javascript" src="lib/xml3d.js"></script>
+        <script type="text/javascript" src="lib/modalbox.js"></script>
+        <script type="text/javascript" src="lib/jquery-1.4.4.min.js"></script>
+        <script type="text/javascript" src="lib/jquery.cookie.js"></script>
+		<script type="text/javascript" src="lib/actionQueue.js"></script>
+        <script type="text/javascript" src="lib/xml3dwiki.js"></script>
+        <script type="text/javascript" src="lib/util.js"></script>
+        <script type="text/javascript" src="lib/toolbar.js"></script>
+        <script type="text/javascript" src="lib/em.js"></script>
+        <script type="text/javascript" src="lib/comm.js"></script>
+        <script type="text/javascript" src="lib/genericsHandler.js"></script>
+        <script type="text/javascript" src="lib/perspective.js"></script> <!-- Rotation und Bewegung der Perspektive über die Maus von Lukas -->
+		<script type="text/javascript" src="lib/items.js"></script>
+		<script type="text/javascript" src="lib/color.js"></script>
+		<script type="text/javascript" src="lib/room.js"></script>
+		<script type="text/javascript" src="lib/view.js"></script>
+        <script type="text/javascript">
+        $(document).ready(function() {
+	    	X3D.menu.init_nav();
+            X3D.log.init($('#output').get(0));
+            X3D.em.init();
+            X3D.tb.init($('#status'));
+            X3D.ws.init();
+            X3D.main.init();
+            X3D.dia.initmb();
+            X3D.listener.init(); <!-- Funktion aus perspective.js -->
+            X3D.gen.init();
+			X3D.queue.init();
+			X3D.shader.init();
+			X3D.items.init();
+			X3D.move.init();
+			X3D.view.init();
+			X3D.main.noConnectionDialog();
+
+            // ugly workaround
+            // $('#MyXml3d').css('height', window.innerHeight-33);
+
+            $('#collexp').click(function(evt) {
+                $('#debug').slideToggle('fast', function() {
+                    $.cookie("debug", $('#debug').is(':visible'));
+
+                    $('#collexp').attr('src', $('#debug').is(':visible')
+                        ? 'media/coll.png' : 'media/exp.png');
+                })
+            });
+
+            // activate last known debug setting
+            if ($.cookie('debug') == "true") {
+                $('#collexp').click();
+            }
+
+            $('#status div').click(function(evt) {
+                X3D.ws.toggle();
+            });
+/*
+$('#MyXml3d').bind('DOMNodeInserted', function(foo) { alert("someone added a node"); console.log(foo); });
+$('#MyXml3d').bind('DOMNodeRemoved', function() { alert("someone deleted a node"); });
+*/
+            X3D.log.get("index.html").info("DOM ready");
+        });
+        </script>
+    </head>
+
+<body>
+<div class="toolbar">
+         <ul id="tools">
+         <li id="logo">XML3D</li>
+         <!-- Icons based on farm-fresh theme made by FatCow Web Hosting
+              http://www.fatcow.com/free-icons/ -->
+         <li><input type="button" title="Create Room" style="background-image: url(media/create_new_dimension.png);" onclick="X3D.tb.createRoomDialog();"/></li>
+         <li>&nbsp;<span style="border: 1px dotted #7A7A7A; border-top: 0; border-bottom: 0;"></span>&nbsp;</li>
+         <li><input type="button" title="Insert Generic Element" style="background-image: url(media/create_new_element.png);" onclick="X3D.tb.createBoxDialog(null)"/></li>
+         <li><input type="button" title="delete elements" style="background-image: url(media/delete_object.png);" onclick="X3D.main.deleteElement();"/></li>
+         <li><input type="button" title="Change Color" onclick="X3D.tb.changeColorDialog();" style="background-image: url(media/change_color.png);"/></li>
+         <li><input type="button" title="change texture" style="background-image: url(media/change_texture.png);" onclick="X3D.tb.changeTextureDialog();"/></li>
+         <li><input type="button" title="toggle mode" style="background-image: url(media/change_movement_mode.png);" onclick="X3D.main.toggleMode();"/></li>
+         <li><input type="button" title="Undo" onclick="X3D.queue.undo()" style="background-image: url(media/undo.png);"/></li>
+         <li><input type="button" title="Redo" onclick="X3D.queue.redo()" style="background-image: url(media/redo.png);"/></li>
+         <li>&nbsp;<span style="border: 1px dotted #7A7A7A; border-top: 0; border-bottom: 0;"></span>&nbsp;</li>
+         <li><input type="button" title="Change View" style="background-image: url(media/change_perspective.png);" onclick="X3D.view.createViewDialog()"/></li>
+		 <li><input type="button" title="Show All Walls" style="background-image: url(media/walls.png);" onclick="X3D.view.recreateDeletedWalls();"/></li>
+		 <li><input type="button" title="Toggle testing" style="background-image: url(media/icon.png);" onclick="X3D.main.toggleTesting();"/></li>
+         <li><input type="button" title="send init message" style="background-image: url(media/icon.png);" onclick="X3D.main.sendInit();"/></li>
+         <!--<li><input type="checkbox" title="show light source" onclick="X3D.main.toggleLights();"/>show light</li>-->
+         <li style="float: right;">
+           <ul style="margin: 0; padding: 0; list-style: none;">
+             <li>Mode:
+                <input style="background: transparent; width: 40px; border: 0;
+                padding: 0 3px;" id='currentMode' type="text" value="loading" disabled="disabled" />
+             </li>
+             <li>Status:<div id="status">&nbsp;</div></li>
+           </ul>
+          </li>
+         </ul>
+</div>
+
+<div class="mitte">
+         <div id="rechts">
+                 <div id="right">
+                         <div id="rightHeader">Items in Room</div>
+                         <!-- BrowseList -->
+                         <div id="rightContent">
+						 <b>Floor Objects</b><br />
+						 <div id="rightContent_ground" />
+						 <b>Other objects</b><br />
+						 <div id="rightContent_onwall" />
+						 <b>Light sources</b><br />
+						 <div id="rightContent_light" />
+						 <b>Walls</b><br />
+						 <div id="rightContent_wall" />
+						 <input type="button" value="Commit" onclick="X3D.main.commitChanges();">Submit Changes</input>
+						 <input type="button" value="Rollback" onclick="X3D.main.removeAllChanges();">Submit Changes</input><br />
+                         <!--<b>Room parts</b><br />
+                         <input type="checkbox" name="zutat" value="salami" />Door1<br />
+                         <input type="checkbox" name="zutat" value="pilze" />Window1<br />
+                         <input type="checkbox" name="zutat" value="sardellen" />Window2<br />
+                         <input type="checkbox" name="zutat" value="sardellen" />Floor<br />
+
+
+                         <b>Light sources</b><br />
+                         <input type="checkbox" name="zutat" value="sardellen" />light1<br />
+                         <input type="checkbox" name="zutat" value="sardellen" />light2<br />
+
+                         <b>Furniture</b><br />
+                         <input type="checkbox" name="zutat" value="sardellen" />Table1<br />
+                         <input type="checkbox" name="zutat" value="sardellen" />Chair1<br />
+                         <input type="checkbox" name="zutat" value="sardellen" />Chair2<br />
+                         <input type="checkbox" name="zutat" value="sardellen" />Chair3<br />
+                         <input type="checkbox" name="zutat" value="sardellen" />Chair4<br />
+                         <input type="checkbox" name="zutat" value="sardellen" />TV<br />
+                         <input type="checkbox" name="zutat" value="sardellen" />Chair1<br />
+                         <input type="checkbox" name="zutat" value="sardellen" />cupboard<br />-->
+
+                         </div>
+                 </div>
+         </div>
+         <div id="mainXML3D">
+
+<xml3d xmlns="http://www.xml3d.org/2009/xml3d" id="MyXml3d" activeView="#defaultView" physics:gravity="0 0 0">
+                <defs id="3dDefs">
+                    <shader id="redShader" script="urn:xml3d:shader:phong">
+                        <float3 name="diffuseColor">1.0 0.0 0.0</float3>
+                        <float name="ambientIntensity">1.0</float>
+                    </shader>
+                    <transform id="t_Lamp" rotation="0.205942 0.331517 0.920698 1.926274" scale="1.000000 1.000000 1.000000" translation="2 1.005454 5.903862"/>
+                    <transform id="t_Cube.002" rotation="-0.913752 -0.288358 -0.286194 1.420921" scale="8.800000 0.040000 5.200000" translation="0.839277 1.194822 -6.712218"/> <!-- room -->
+                    <transform id="Linie" scale="5 0.1 1"  rotation="0 0 0 0" translation="0 0 0"/>
+                    <transform id="Linie2" scale="5 0.1 1"  rotation="0 1 0 1.570796" translation="0 0 0"/>
+                    <transform id="Linie3" scale="5 0.1 1"  rotation="0 0 1 1.570796" translation="-5 0 0"/>
+
+                    <lightshader id="ls_Spot" script="urn:xml3d:lightshader:point">  <!-- Licht zum testen -->
+                        <bool name="castShadow">
+                        true
+                        </bool>
+                        <float3 name="attenuation">
+                        1.000000 0.033333 0.000000
+                        </float3>
+                        <float3 name="intensity">
+                        1.00000 1.00000 1.00000
+                        </float3>
+                    </lightshader>
+                    <data id="Cube.003_data"> <!-- room (2 walls + 1 floor)-->
+                    <int name="index">
+                     0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 12 14 15 16 17 18 19 20 21 22 23 24 23 25 24 26 27 28 27 29 28 30 31 32 30 32 33 34 35 36 37 38 39 40 41 42 41 43 42 44 45 46 47 48 49 50 51 52 51 53 52 54 55 56 55 57 56 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 83 85 84 86 87 88 86 88 89
+                    </int>
+                    <float3 name="position">
+                     1.000000 -380.331970 -0.992718 1.000000 -0.331909 -0.992718 -1.000000 -0.331909 -0.992718 1.000000 -380.331970 -0.992718 -1.000000 -0.331909 -0.992718 -1.000000 -380.331970 -0.992718 -1.000000 -0.331909 -1.008103 -1.000000 -380.331970 -1.008103 -1.000000 -380.331970 -0.992718 -1.000000 -0.331909 -1.008103 -1.000000 -380.331970 -0.992718 -1.000000 -0.331909 -0.992718 1.000000 -0.331909 -1.008103 0.999999 -380.331970 -1.008103 -1.000000 -380.331970 -1.008103 -1.000000 -0.331909 -1.008103 1.000000 -0.331909 -0.992718 1.000000 -380.331970 -0.992718 0.999999 -380.331970 -1.008103 1.000000 -0.331909 -0.992718 0.999999 -380.331970 -1.008103 1.000000 -0.331909 -1.008103 1.000000 -380.331970 -0.992718 -1.000000 -380.331970 -0.992718 0.999999 -380.331970 -1.008103 -1.000000 -380.331970 -1.008103 1.000000 -0.331909 -0.992718 1.000000 -0.331909 -1.008103 -1.000000 -0.331909 -0.992718 -1.000000 -0.331909 -1.008103 -0.994381 -380.331970 -1.000001 -0.994381 -0.331919 -1.000000 -0.994381 -0.331930 1.000000 -0.994381 -380.332001 1.000000 -1.003472 -0.331930 1.000000 -1.003472 -380.332001 1.000000 -0.994381 -380.332001 1.000000 -1.003472 -0.331930 1.000000 -0.994381 -380.332001 1.000000 -0.994381 -0.331930 1.000000 -1.003472 -0.331919 -1.000000 -1.003472 -380.331970 -0.999999 -1.003472 -0.331930 1.000000 -1.003472 -380.332001 1.000000 -0.994381 -0.331919 -1.000000 -0.994381 -380.331970 -1.000001 -1.003472 -380.331970 -0.999999 -0.994381 -0.331919 -1.000000 -1.003472 -380.331970 -0.999999 -1.003472 -0.331919 -1.000000 -0.994381 -380.331970 -1.000001 -0.994381 -380.332001 1.000000 -1.003472 -380.331970 -0.999999 -1.003472 -380.332001 1.000000 -0.994381 -0.331919 -1.000000 -1.003472 -0.331919 -1.000000 -0.994381 -0.331930 1.000000 -1.003472 -0.331930 1.000000 1.000000 0.999999 1.000000 1.000000 1.000000 -1.000000 -1.000000 1.000000 -1.000000 1.000000 0.999999 1.000000 -1.000000 1.000000 -1.000000 -1.000000 1.000000 1.000000 -1.000000 -1.000000 -1.000000 -1.000000 -1.000000 1.000000 -1.000000 1.000000 1.000000 -1.000000 -1.000000 -1.000000 -1.000000 1.000000 1.000000 -1.000000 1.000000 -1.000000 1.000000 -1.000000 -1.000000 0.999999 -1.000001 1.000000 -1.000000 -1.000000 -1.000000 0.999999 -1.000001 1.000000 -1.000000 -1.000000 1.000000 -1.000000 -1.000000 -1.000000 1.000000 1.000000 -1.000000 1.000000 0.999999 1.000000 1.000000 -1.000000 -1.000000 1.000000 0.999999 1.000000 0.999999 -1.000001 1.000000 1.000000 -1.000000 -1.000000 1.000000 0.999999 1.000000 -1.000000 1.000000 1.000000 0.999999 -1.000001 1.000000 -1.000000 -1.000000 1.000000 1.000000 1.000000 -1.000000 1.000000 -1.000000 -1.000000 -1.000000 -1.000000 -1.000000 -1.000000 1.000000 -1.000000
+                    </float3>
+                    <float3 name="normal">
+                     0.000000 -0.000000 1.000000 0.000000 -0.000000 1.000000 0.000000 -0.000000 1.000000 0.000000 -0.000000 1.000000 0.000000 -0.000000 1.000000 0.000000 -0.000000 1.000000 -1.000000 0.000000 0.000027 -1.000000 0.000000 0.000027 -1.000000 0.000000 0.000027 -1.000000 0.000000 0.000031 -1.000000 0.000000 0.000031 -1.000000 0.000000 0.000031 0.000000 0.000000 -1.000000 0.000000 0.000000 -1.000000 0.000000 0.000000 -1.000000 0.000000 0.000000 -1.000000 1.000000 0.000000 -0.000074 1.000000 0.000000 -0.000074 1.000000 0.000000 -0.000074 1.000000 -0.000000 0.000000 1.000000 -0.000000 0.000000 1.000000 -0.000000 0.000000 0.000000 -1.000000 0.000000 0.000000 -1.000000 0.000000 0.000000 -1.000000 0.000000 0.000000 -1.000000 0.000000 0.000000 1.000000 0.000004 0.000000 1.000000 0.000004 0.000000 1.000000 0.000004 0.000000 1.000000 0.000004 1.000000 0.000000 -0.000000 1.000000 0.000000 -0.000000 1.000000 0.000000 -0.000000 1.000000 -0.000000 -0.000000 0.000046 0.000000 1.000000 0.000046 0.000000 1.000000 0.000046 0.000000 1.000000 0.000052 0.000000 1.000000 0.000052 0.000000 1.000000 0.000052 0.000000 1.000000 -1.000000 0.000000 0.000000 -1.000000 0.000000 0.000000 -1.000000 0.000000 0.000000 -1.000000 0.000000 0.000000 -0.000125 0.000000 -1.000000 -0.000125 0.000000 -1.000000 -0.000125 0.000000 -1.000000 0.000000 -0.000000 -1.000000 0.000000 -0.000000 -1.000000 0.000000 -0.000000 -1.000000 -0.000000 -1.000000 -0.000015 -0.000000 -1.000000 -0.000015 -0.000000 -1.000000 -0.000015 -0.000000 -1.000000 -0.000015 0.000000 1.000000 0.000006 0.000000 1.000000 0.000006 0.000000 1.000000 0.000006 0.000000 1.000000 0.000006 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 -1.000000 0.000000 -0.000000 -1.000000 0.000000 -0.000000 -1.000000 0.000000 -0.000000 -1.000000 0.000000 -0.000000 -1.000000 0.000000 -0.000000 -1.000000 0.000000 -0.000000 -0.000000 -1.000000 -0.000000 -0.000000 -1.000000 -0.000000 -0.000000 -1.000000 -0.000000 -0.000000 -1.000000 0.000000 -0.000000 -1.000000 0.000000 -0.000000 -1.000000 0.000000 1.000000 0.000000 -0.000000 1.000000 0.000000 -0.000000 1.000000 0.000000 -0.000000 1.000000 -0.000001 0.000000 1.000000 -0.000001 0.000000 1.000000 -0.000001 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 -1.000000 0.000000 0.000000 -1.000000 0.000000 0.000000 -1.000000 0.000000 0.000000 -1.000000
+                    </float3>
+                    </data>
+
+                    <shader id="Material.001" script="urn:xml3d:shader:phong"> <!-- room -->
+                    <float name="ambientIntensity">
+                     0.0
+                    </float>
+                    <float3 name="diffuseColor">
+                     1.000000 1.000000 0.800000
+                    </float3>
+                    <float3 name="specularColor">
+                     0.500000 0.500000 0.500000
+                    </float3>
+                    <float name="shininess">
+                     0.0978473581213
+                    </float>
+                    </shader>
+                    <lightshader id="ex5_1_lightShader" script="urn:xml3d:lightshader:point">  <!-- Licht zum testen -->
+                        <float3 name="intensity">0.9 0.6 0.3</float3>
+                        <float3 name="attenuation">0 0 1</float3>
+                        <bool name="castShadow">true</bool>
+                    </lightshader>
+                    <transform id="ex5_1_lightXfm" translation="0 1.5 -4.5"/>
+                </defs>
+                <view id="defaultView" position="0 0 10" orientation="0 0 0 0"/>
+
+                <!--<group id='Licht' transform="#t_Lamp">
+                 <light shader="#ls_Spot"/>
+                </group>-->
+
+				<view id="camera_1" position="0 0 0" orientation="0 0 0 0"/>
+				<view id="camera_2" position="0 0 0" orientation="0 0 0 0"/>
+				<view id="camera_3" position="0 0 0" orientation="0 0 0 0"/>
+				<view id="camera_4" position="0 0 0" orientation="0 0 0 0"/>
+				<view id="camera_5" position="0 0 0" orientation="0 0 0 0"/>
+            </xml3d>
+            <br />
+
+            <div id="xml3d_scripts" />
+
+         </div>
+</div>
+
+<div id="fuss">
+         <!-- SelectMenu -->
+         <div id="navigation">
+                 <ul class="opened" id="root">
+                         <li>
+                                 <img src="media/doc.gif" alt="" />
+                                 <a class="nav">Product Catalog</a>
+                         </li>
+
+                         <li id="faunawelt_intern">
+                                 <a class="folder" onclick="X3D.menu.toggle('faunawelt_intern',true)">
+                                 <img src="media/opened.gif" alt="" id="img_faunawelt_intern" />Rooms</a>
+                         <ul id="ul_faunawelt_intern" class="opened">
+                                 <li>
+
+                                         <a class="nav" onclick="X3D.menu.toggleList('Office')">
+										 <img src="media/doc.gif" alt="" /> Office</a>
+                                 </li>
+                                 <li>
+
+                                         <a class="nav" onclick="X3D.menu.toggleList('Bathroom')">
+										 <img src="media/doc.gif" alt="" />Bathroom</a>
+                                 </li>
+                                 <li>
+                                         <a class="nav" onclick="X3D.menu.toggleList('LivingRoom')">
+										 <img src="media/doc.gif" alt="" />Living Room</a>
+                                 </li>
+								 <li>
+                                         <a class="nav" onclick="X3D.menu.toggleList('otherObjects')">
+										 <img src="media/doc.gif" alt="" />Others</a>
+                                 </li>
+                         </ul><!-- Ende: ul_faunawelt_intern -->
+                         </li>
+                 </ul>
+         </div>
+         <!-- ChooseList -->
+         <div id="choose">
+                 <div id="browseHeader">Product Range</div>
+                 <!-- BrowseList -->
+                 <!--<div id="browseList" > -->
+				 <div id="browseList" >
+					 <div id="LivingRoom" class="closed" style="width: 1000px;">
+						 <!--<img src="media/previews/sideboard2.jpg" alt="Sideboard" style="float: left;" height="80px" onclick="X3D.tb.createBoxDialog('SideboardsGenerics:sideboard2')" />
+						 <img src="media/previews/oneSeater.jpg" alt="OneSeater" style="float: left;" height="80px" onclick="X3D.tb.createBoxDialog('sofasGenerics:OneSeater')" />
+						 <img src="media/previews/twoSeater.jpg" alt="OneSeater" style="float: left;" height="80px" onclick="X3D.tb.createBoxDialog('sofasGenerics:TwoSeater')" />
+						 <img src="media/previews/floorLamp2.jpg" alt="FloorLamp" style="float: left;" height="80px" onclick="X3D.tb.createBoxDialog('lightsGenerics:floorLamp2')" />
+						 <img src="media/previews/window1.jpg" alt="Window" height="80px" style="float: left;" onclick="X3D.tb.createBoxDialog('windowsGenerics:window1')" />
+						 <img src="media/previews/door1.jpg" alt="Door" height="80px" style="float: left;" onclick="X3D.tb.createBoxDialog('windowsGenerics:door1')" />-->
+					</div>
+					<div id="Bathroom" class="closed" style="width: 1000px;">
+					 <!--<img src="media/previews/klo.jpg" alt="Klo" height="80px" style="float: left;" onclick="X3D.tb.createBoxDialog('bathsGenerics:klo')" />-->
+					</div>
+					<div id="Office" class="opened" style="width: 1000px;">
+						<!--<img src="media/previews/table2.jpg" alt="Office Table" height="80px" style="float: left;" onclick="X3D.tb.createBoxDialog('table2Generics:table2')" />
+						<img src="media/previews/OfficeChair1.jpg" alt="Office Chair" height="80px" style="float: left;" onclick="X3D.tb.createBoxDialog('ChairsGenerics:OfficeChair1')" />-->
+
+					</div>
+					<div id="otherObjects" class="closed" style="width: 1000px;">
+					</div>
+				</div>
+         </div>
+</div>
+
+
+<!-- Debug -->
+<div id="expand">
+            <img id="collexp" src="media/exp.png" alt="Collapse / Expand debugging information" />
+        </div>
+        <div id="debug">
+            <div class="toolbar" id="debugheader">
+                <h3 style="display: inline;">Debugging Output</h3>
+                <div style="float: right; padding-right: 5px;">
+                    <button onclick="javascript: $('#output').val($('#output').val()+(new Array(125).join('-'))+'\n')">insert marker</button> |
+                    <button onclick="javascript: $('#output').val('')">clear</button>
+                </div>
+            </div>
+            <textarea id="output" readonly="readonly"></textarea>
+        </div>
+        <div id="box" class="dialog" style="display: none;">
+            <div style="text-align:center">
+                <ol id="items"></ol>
+                <div id="dialogContent"></div>
+                <button id='submitButton' >OK</button><!--onclick="X3D.dia.hm('box');"-->
+                <button onclick="X3D.dia.hm('box');">Cancel</button>
+				<div id="dialogButtons" />
+            </div>
+        </div>
+		<div id="box2" class="dialog" style="display: none;">
+            <div style="text-align:center">
+                <ol id="items2"></ol>
+                <div id="dialogContent2"></div>
+            </div>
+        </div>
+		 <div id="box3" class="dialog" style="display: none;">
+            <div style="text-align:center">
+                <ol id="items3"></ol>
+                <div id="dialogContent3"></div>
+                <button id = 'hideButton'>Hide</button>
+				<button id = 'lockButton'>Lock</button>
+                <button id = 'cancelButton'>Cancel</button>
+            </div>
+        </div>
+</body>
+</html>
